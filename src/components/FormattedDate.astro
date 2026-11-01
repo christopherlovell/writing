@@ -1,0 +1,13 @@
+---
+interface Props {
+  date: Date;
+}
+
+const { date } = Astro.props;
+const fmt = (opts: Intl.DateTimeFormatOptions) =>
+  date.toLocaleDateString('en-GB', { ...opts, timeZone: 'UTC' });
+---
+
+<time datetime={date.toISOString().slice(0, 10)}>
+  <span>{fmt({ day: 'numeric', month: 'long' })}</span>{' '}<span>{fmt({ year: 'numeric' })}</span>
+</time>

@@ -1,0 +1,78 @@
+---
+import '@fontsource-variable/literata/opsz.css';
+import '@fontsource-variable/literata/opsz-italic.css';
+import '../styles/global.css';
+import { AUTHOR, AUTHOR_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+
+interface Props {
+  title?: string;
+  description?: string;
+  home?: boolean;
+}
+
+const { title, description = SITE_DESCRIPTION, home = false } = Astro.props;
+const pageTitle = `${title ?? SITE_TITLE} | ${AUTHOR}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={AUTHOR} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:type" content={title ? 'article' : 'website'} />
+    <meta property="og:title" content={title ?? SITE_TITLE} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="generator" content={Astro.generator} />
+    <script is:inline>
+      // Apply a saved theme before first paint to avoid a flash of light mode.
+      try {
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.dataset.theme = 'dark';
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <div class="frame">
+      <header class:list={['masthead', { home }]}>
+        {home ? <h1 class="site-title">{SITE_TITLE}</h1> : <a class="site-title" href="/">{SITE_TITLE}</a>}
+        <button class="theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <circle cx="12" cy="12" r="8.25" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+            <path d="M12 3.75a8.25 8.25 0 0 1 0 16.5z" fill="currentColor"></path>
+          </svg>
+        </button>
+      </header>
+      <main>
+        <slot />
+      </main>
+      <footer class="colophon">
+        <a href="/rss.xml">RSS feed</a>
+        <a href={AUTHOR_URL}>christopherlovell.co.uk</a>
+      </footer>
+    </div>
+    <script>
+      const root = document.documentElement;
+      const toggle = document.querySelector('.theme-toggle')!;
+      const sync = () => toggle.setAttribute('aria-pressed', String(root.dataset.theme === 'dark'));
+
+      toggle.addEventListener('click', () => {
+        const dark = root.dataset.theme !== 'dark';
+        if (dark) root.dataset.theme = 'dark';
+        else delete root.dataset.theme;
+        try {
+          localStorage.setItem('theme', dark ? 'dark' : 'light');
+        } catch {}
+        sync();
+      });
+      sync();
+    </script>
+  </body>
+</html>

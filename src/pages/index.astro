@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+import { getPosts } from '../lib/posts';
+
+const posts = await getPosts();
+const byYear = Map.groupBy(posts, (post) => post.data.date.getUTCFullYear());
+---
+
+<Base home>
+  {posts.length === 0 && <p>No posts yet.</p>}
+  {
+    [...byYear].map(([year, entries]) => (
+      <section class="year">
+        <h2 class="margin-label">{year}</h2>
+        <ol class="entries">
+          {entries.map((post) => (
+            <li>
+              <a href={`/${post.id}/`}>{post.data.title}</a>
+              {post.data.draft && <span class="draft-flag">Draft</span>}
+              <p>{post.data.description}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))
+  }
+</Base>
